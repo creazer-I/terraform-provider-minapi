@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -42,13 +43,6 @@ information about the response.
 			"payload": schema.StringAttribute{
 				Description: "The payload to be sent in the POST request.",
 				Required:    true,
-				ValidateFunc: func(v interface{}, c string) ([]string, []error) {
-					payload := v.(string)
-					if len(payload) > 1000 {
-						return nil, []error{fmt.Errorf("payload must be at most 1000 characters long")}
-					}
-					return nil, nil
-				},
 			},
 			"response_body": schema.StringAttribute{
 				Description: "The response body returned as a string.",
@@ -69,15 +63,7 @@ func (r *MinAPIHttpResource) Create(ctx context.Context, req resource.CreateRequ
 	url := config.Url.ValueString()
 	payload := config.Payload.ValueString()
 
-	request, err := http.NewRequest("POST", url, strings.NewReader(payload))
-	if err != nil {
-		resp.Diagnostics.AddError("Error creating HTTP request", err.Error())
-		return
-	}
-	request.Header.Set("Content-Type", "application/json")
-
-	client := http.Client{}
-	response, err := client.Do(request)
+	response, err := http.Post(url, "application/json", strings.NewReader(payload))
 	if err != nil {
 		resp.Diagnostics.AddError("Error making HTTP request", err.Error())
 		return
@@ -90,7 +76,8 @@ func (r *MinAPIHttpResource) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
-	resp.State.Set(ctx, "response_body", types.StringValue(string(responseBody)))
+	resp.State.Set("id", url)
+	resp.State.Set("response_body", types.StringValue(string(responseBody)))
 }
 
 type MinAPIHttpResourceModel struct {

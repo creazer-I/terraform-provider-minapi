@@ -155,3 +155,4 @@ type MinAPIHttpResourceModel struct {
 	Payload types.String `tfsdk:"payload"`
 }
 
+

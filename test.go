@@ -1,85 +1,103 @@
 package provider
 
 import (
-	"context"
-	"net/http"
-	"time"
+    "context"
+    "encoding/json"
+    "fmt"
+    "io"
+    "net/http"
+    "strings"
 
-	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+    "github.com/hashicorp/terraform-plugin-framework/resource"
+    "github.com/hashicorp/terraform-plugin-framework/resource/schema"
+    "github.com/hashicorp/terraform-plugin-framework/tfsdk"
+    "github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-func validateVerb(val interface{}, key string) (warns []string, errs []error) {
-	// Validation logic here
-	return
+var _ resource.Resource = (*MinAPIHttpResource)(nil)
+
+func NewMinAPIHttpResource() resource.Resource {
+    return &MinAPIHttpResource{}
 }
 
-func resourceMinApi() *schema.Resource {
-	return &schema.Resource{
-		CreateContext: resourceMinApiCreate,
-		ReadContext:   nil, // Read operation integrated into Create
-		UpdateContext: resourceMinApiUpdate,
-		DeleteContext: resourceMinApiDelete,
+type MinAPIHttpResource struct{}
 
-		Schema: map[string]*schema.Schema{
-			"url": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"method": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "GET",
-			},
-			"request_headers": {
-				Type:     schema.TypeMap,
-				Optional: true,
-			},
-			// Define other attributes as needed
-		},
-	}
+func (r *MinAPIHttpResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+    resp.TypeName = "http"
 }
 
-func resourceMinApiCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	url := d.Get("url").(string)
-	method := d.Get("method").(string)
-	headers := d.Get("request_headers").(map[string]interface{})
-
-	// Perform the HTTP request
-	client := &http.Client{
-		Timeout: time.Second * 10, // Example timeout, adjust as needed
-	}
-
-	req, err := http.NewRequestWithContext(ctx, method, url, nil)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	for name, value := range headers {
-		req.Header.Set(name, value.(string))
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	defer resp.Body.Close()
-
-	// Read response body
-	// Update resource data with response attributes
-	// SetId as needed
-	d.SetId(url)
-
-	return nil
+func (r *MinAPIHttpResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+    resp.Schema = schema.Schema{
+        Description: `
+The ` + "`http`" + ` resource makes an HTTP POST request to the given URL and exports
+information about the response.
+`,
+        Attributes: map[string]schema.Attribute{
+            "id": schema.StringAttribute{
+                Description: "The URL used for the request.",
+                Computed:    true,
+            },
+            "url": schema.StringAttribute{
+                Description: "The URL for the request.",
+                Required:    true,
+            },
+            "payload": schema.StringAttribute{
+                Description: "The payload to be sent in the POST request.",
+                Required:    true,
+                ValidateFunc: func(v interface{}, p string) (ws []string, errors []error) {
+                    // Validate payload length
+                    payload := v.(string)
+                    if len(payload) > 1000 {
+                        errors = append(errors, fmt.Errorf("payload must be at most 1000 characters long"))
+                    }
+                    return
+                },
+            },
+            "response_body": schema.StringAttribute{
+                Description: "The response body returned as a string.",
+                Computed:    true,
+            },
+        },
+    }
 }
 
-func resourceMinApiUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// Update logic if necessary
-	return nil
+func (r *MinAPIHttpResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+    var config MinAPIHttpResourceModel
+    diags := req.Config.Get(ctx, &config)
+    resp.Diagnostics.Append(diags...)
+    if resp.Diagnostics.HasError() {
+        return
+    }
+
+    url := config.Url.ValueString()
+    payload := config.Payload.ValueString()
+
+    request, err := http.NewRequest("POST", url, strings.NewReader(payload))
+    if err != nil {
+        resp.Diagnostics.AddError("Error creating HTTP request", err.Error())
+        return
+    }
+    request.Header.Set("Content-Type", "application/json")
+
+    client := http.Client{}
+    response, err := client.Do(request)
+    if err != nil {
+        resp.Diagnostics.AddError("Error making HTTP request", err.Error())
+        return
+    }
+    defer response.Body.Close()
+
+    responseBody, err := io.ReadAll(response.Body)
+    if err != nil {
+        resp.Diagnostics.AddError("Error reading response body", err.Error())
+        return
+    }
+
+    resp.State.SetId(url)
+    resp.State.Set("response_body", types.StringValue(string(responseBody)))
 }
 
-func resourceMinApiDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// Delete logic if necessary
-	return nil
+type MinAPIHttpResourceModel struct {
+    Url     types.String `tfsdk:"url"`
+    Payload types.String `tfsdk:"payload"`
 }

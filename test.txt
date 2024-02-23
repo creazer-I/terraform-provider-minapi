@@ -1,6 +1,0 @@
-internal\provider\minapi_resource_http.go:15:27: cannot use (*MinAPIHttpResource)(nil) (value of type *MinAPIHttpResource) as resource.Resource value in variable declaration: *MinAPIHttpResource does not implement resource.Resource (missing method Delete)
-internal\provider\minapi_resource_http.go:18:9: cannot use &MinAPIHttpResource{} (value of type *MinAPIHttpResource) as resource.Resource value in return statement: *MinAPIHttpResource does not implement resource.Resource (missing method Delete)
-internal\provider\minapi_resource_http.go:45:5: unknown field ValidateFunc in struct literal of type "github.com/hashicorp/terraform-plugin-framework/resource/schema".StringAttribute
-internal\provider\minapi_resource_http.go:93:39: too many arguments in call to resp.State.Set
-        have (context.Context, string, basetypes.StringValue)
-        want (context.Context, interface{})

@@ -1,11 +1,6 @@
-        internal\provider\minapi_resource.go:9:2: other declaration of schema
-internal\provider\minapi_resource.go:18:31: undefined: schema.Resource       
-internal\provider\minapi_resource.go:19:17: undefined: schema.Resource       
-internal\provider\minapi_resource.go:27:22: undefined: schema.TypeString     
-internal\provider\minapi_resource.go:44:58: undefined: schema.ResourceData   
-internal\provider\minapi_resource.go:44:90: undefined: diag
-internal\provider\minapi_resource.go:77:58: undefined: schema.ResourceData   
-internal\provider\minapi_resource.go:77:90: undefined: diag
-internal\provider\minapi_resource.go:82:58: undefined: schema.ResourceData   
-internal\provider\minapi_resource.go:82:90: undefined: diag
-internal\provider\minapi_resource.go:27:22: too many errors
+internal\provider\minapi_resource_http.go:13:5: "github.com/hashicorp/terraform-plugin-framework/tfsdk" imported and not used
+internal\provider\minapi_resource_http.go:17:27: cannot use (*MinAPIHttpResource)(nil) (value of type *MinAPIHttpResource) as resource.Resource value in variable declaration: *MinAPIHttpResource does not implement resource.Resource (missing method Delete)
+internal\provider\minapi_resource_http.go:20:12: cannot use &MinAPIHttpResource{} (value of type *MinAPIHttpResource) as resource.Resource value in return statement: *MinAPIHttpResource does not implement resource.Resource (missing method Delete)
+internal\provider\minapi_resource_http.go:47:17: unknown field ValidateFunc in struct literal of type "github.com/hashicorp/terraform-plugin-framework/resource/schema".StringAttribute
+internal\provider\minapi_resource_http.go:96:16: resp.State.SetId undefined (type tfsdk.State has no field or method SetId)
+internal\provider\minapi_resource_http.go:97:20: cannot use "response_body" (constant of type string) as context.Context value in argument to resp.State.Set: string does not implement context.Context (missing method Deadline)

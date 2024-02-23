@@ -1,0 +1,11 @@
+        internal\provider\minapi_resource.go:9:2: other declaration of schema
+internal\provider\minapi_resource.go:18:31: undefined: schema.Resource       
+internal\provider\minapi_resource.go:19:17: undefined: schema.Resource       
+internal\provider\minapi_resource.go:27:22: undefined: schema.TypeString     
+internal\provider\minapi_resource.go:44:58: undefined: schema.ResourceData   
+internal\provider\minapi_resource.go:44:90: undefined: diag
+internal\provider\minapi_resource.go:77:58: undefined: schema.ResourceData   
+internal\provider\minapi_resource.go:77:90: undefined: diag
+internal\provider\minapi_resource.go:82:58: undefined: schema.ResourceData   
+internal\provider\minapi_resource.go:82:90: undefined: diag
+internal\provider\minapi_resource.go:27:22: too many errors

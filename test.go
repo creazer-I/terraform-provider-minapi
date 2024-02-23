@@ -50,7 +50,7 @@ information about the response.
 	}
 }
 
-func (r *MinAPIHttpResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r MinAPIHttpResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var config MinAPIHttpResourceModel
 	diags := req.Config.Get(ctx, &config)
 	resp.Diagnostics.Append(diags...)
@@ -74,15 +74,83 @@ func (r *MinAPIHttpResource) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
-	resp.State.Set("id", url)
-	resp.State.Set("response_body", types.StringValue(string(responseBody)))
+	type State struct {
+		ID           string
+		ResponseBody string
+	}
+
+	state := State{
+		ID:           url,
+		ResponseBody: string(responseBody),
+	}
+
+	resp.State.Set(ctx, state)
+}
+
+func (r *MinAPIHttpResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data *MinAPIHttpResourceModel
+
+	// Read Terraform prior state data into the model
+	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// If applicable, this is a great opportunity to initialize any necessary
+	// provider client data and make a call using it.
+	// httpResp, err := r.client.Do(httpReq)
+	// if err != nil {
+	//     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read MinApi, got error: %s", err))
+	//     return
+	// }
+
+	// Save updated data into Terraform state
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *MinAPIHttpResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	// Implement delete logic here if needed
+	data := "g"
+	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// If applicable, this is a great opportunity to initialize any necessary
+	// provider client data and make a call using it.
+	// httpResp, err := r.client.Do(httpReq)
+	// if err != nil {
+	//     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete MinApi, got error: %s", err))
+	//     return
+	// }
 }
+
+func (r *MinAPIHttpResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data *MinAPIHttpResourceModel
+
+	// Read Terraform plan data into the model
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// If applicable, this is a great opportunity to initialize any necessary
+	// provider client data and make a call using it.
+	// httpResp, err := r.client.Do(httpReq)
+	// if err != nil {
+	//     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update MinApi, got error: %s", err))
+	//     return
+	// }
+
+	// Save updated data into Terraform state
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}
+
 
 type MinAPIHttpResourceModel struct {
 	Url     types.String `tfsdk:"url"`
 	Payload types.String `tfsdk:"payload"`
 }
+

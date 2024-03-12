@@ -4,13 +4,14 @@
 package main
 
 import (
-	"context"
-	"flag"
-	"log"
+    "context"
+    "flag"
+    "log"
 
-	"github.com/hashicorp/terraform-plugin-framework/providerserver"
-	"terraform-provider-minapi/internal/provider"
+    "github.com/hashicorp/terraform-plugin-framework/providerserver"
+    "terraform-provider-minapi/internal/provider"
 )
+
 
 // Run "go generate" to format example terraform files and generate the docs for the registry/website
 
@@ -25,7 +26,9 @@ import (
 var (
 	// these will be set by the goreleaser configuration
 	// to appropriate values for the compiled binary.
+	// use semantic versioning (e.g., 1.0.0, 1.0.1, 1.1.0)
 	version string = "dev"
+	//version string = "1.0.0"
 
 	// goreleaser can pass other information to the main package, such as the specific commit
 	// https://goreleaser.com/cookbooks/using-main.version/
@@ -38,12 +41,8 @@ func main() {
 	flag.Parse()
 
 	opts := providerserver.ServeOpts{
-		// NOTE: This is not a typical Terraform Registry provider address,
-		// such as registry.terraform.io/hashicorp/hashicups. This specific
-		// provider address is used in these tutorials in conjunction with a
-		// specific Terraform CLI configuration for manual development testing
-		// of this provider.
-		Address: "hashicorp.com/test/minapi",
+		// TODO: Update this string with the published name of your provider.
+		Address: "hashicorp.com/terraform-provider/minapi",
 		Debug:   debug,
 	}
 
